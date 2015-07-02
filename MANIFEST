@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Mail-JMAPTalk.t
+lib/Mail/JMAPTalk.pm
