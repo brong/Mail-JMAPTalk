@@ -5,6 +5,7 @@ use warnings;
 
 package Mail::JMAPTalk;
 
+use HTTP::Tiny;
 use JSON::XS qw(decode_json encode_json);
 use Convert::Base64;
 use Carp qw(confess);
@@ -95,15 +96,20 @@ sub Request {
     content => encode_json($Requests),
   });
 
+  my $jdata;
+  $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
+
+  # check your own success on the Response object
   if (wantarray) {
-    my $jdata;
-    $jdata = decode_json($Response->{content}) if $Response->{success};
     return ($Response, $jdata);
   }
+
   confess "JMAP request for $Self->{user} failed ($uri): $Response->{status} $Response->{reason}: $Response->{content}"
     unless $Response->{success};
 
-  return decode_json($Response->{content});
+  confess "INVALID JSON $Response->{content}" unless $jdata;
+
+  return $jdata;
 }
 
 
