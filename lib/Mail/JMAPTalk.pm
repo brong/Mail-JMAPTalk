@@ -115,36 +115,34 @@ sub Request {
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
-Mail::JMAPTalk - Perl extension for blah blah blah
+Mail::JMAPTalk - Perl client for the http://jmap.io/ protocol
 
 =head1 SYNOPSIS
 
-  use Mail::JMAPTalk;
-  blah blah blah
+    use Mail::JMAPTalk;
+
+    my $Talk = Mail::JMAPTalk->new(url => $url);
+
+    my $res = $jmap->Request([['setContacts', {
+       create => {
+           "#1" => {firstName => "first", lastName => "last"},
+           "#2" => {firstName => "second", lastName => "last"},
+       }}, "R1"]]);
+    # [["contactsSet", {created => { "#1" => {...}, "#2" => {...} } }, "R1"]]
 
 =head1 DESCRIPTION
 
-Stub documentation for Mail::JMAPTalk, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
+This is a really basic wrapper around the JMAP protocol.  It has a
+rudimentary "Login" command as well, but it doesn't support the
+entire protocol yet.
 
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+http://jmap.io/ - protocol documentation and client guide.
 
 =head1 AUTHOR
 
@@ -152,7 +150,7 @@ Bron Gondwana, E<lt>brong@E<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2015 by Bron Gondwana
+Copyright (C) 2015 by FastMail Pty Ltd.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.20.1 or,
