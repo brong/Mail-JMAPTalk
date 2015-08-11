@@ -10,7 +10,7 @@ use JSON::XS qw(decode_json encode_json);
 use Convert::Base64;
 use Carp qw(confess);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 our $CLIENT = "Net-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
 
