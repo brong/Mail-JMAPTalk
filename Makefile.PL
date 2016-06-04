@@ -7,6 +7,7 @@ WriteMakefile(
     PREREQ_PM         => {
         'Convert::Base64' => 0,
         'JSON::XS'        => 0,
+        'File::LibMagic' => 0,
     }, # e.g., Module::Name => 1.1
     ABSTRACT_FROM     => 'lib/Mail/JMAPTalk.pm', # retrieve abstract from module
     AUTHOR            => 'Bron Gondwana <brong@>',

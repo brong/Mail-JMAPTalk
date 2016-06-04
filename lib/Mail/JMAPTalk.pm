@@ -8,6 +8,7 @@ package Mail::JMAPTalk;
 use HTTP::Tiny;
 use JSON::XS qw(decode_json encode_json);
 use Convert::Base64;
+use File::LibMagic;
 use Carp qw(confess);
 
 our $VERSION = '0.02';
@@ -94,6 +95,50 @@ sub Request {
   my $Response = $Self->ua->post($uri, {
     headers => \%Headers,
     content => encode_json($Requests),
+  });
+
+  my $jdata;
+  $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
+
+  # check your own success on the Response object
+  if (wantarray) {
+    return ($Response, $jdata);
+  }
+
+  confess "JMAP request for $Self->{user} failed ($uri): $Response->{status} $Response->{reason}: $Response->{content}"
+    unless $Response->{success};
+
+  confess "INVALID JSON $Response->{content}" unless $jdata;
+
+  return $jdata;
+}
+
+sub _get_type {
+  my $data = shift;
+  # XXX - escape file names?
+  my $magic = File::LibMagic->new();
+  my $info = $magic->info_from_string($data);
+  return $info->{mime_type};
+}
+
+sub Upload {
+  my ($Self, $data, $type) = @_;
+
+  my %Headers;
+  $Headers{'Content-Type'} = $type || _get_type($data);
+
+  if ($Self->{user}) {
+    $Headers{'Authorization'} = $Self->auth_header();
+  }
+  if ($Self->{token}) {
+    $Headers{'Authorization'} = "JMAP $Self->{token}";
+  }
+
+  my $uri = $Self->uploaduri();
+
+  my $Response = $Self->ua->post($uri, {
+    headers => \%Headers,
+    content => $data,
   });
 
   my $jdata;
