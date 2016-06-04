@@ -37,6 +37,18 @@ sub auth_header {
   return 'Basic ' . encode_base64("$Self->{user}:$Self->{password}", '');
 }
 
+sub uploaduri {
+  my $Self = shift;
+  my $scheme = $Self->{scheme} // 'http';
+  my $host = $Self->{host} // 'localhost';
+  my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
+  my $url = $Self->{uploadurl} // '/upload';
+
+  return $url if $url =~ m/^http/;
+
+  return "$scheme://$host:$port$url";
+}
+
 sub uri {
   my $Self = shift;
   my $scheme = $Self->{scheme} // 'http';
