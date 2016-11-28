@@ -10,6 +10,7 @@ use JSON::XS qw(decode_json encode_json);
 use Convert::Base64;
 use File::LibMagic;
 use Carp qw(confess);
+use Data::Dumper;
 
 our $VERSION = '0.02';
 our $CLIENT = "Net-JMAPTalk";
@@ -111,6 +112,10 @@ sub Request {
 
   my $jdata;
   $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
+
+  if ($ENV{DEBUGJMAP}) {
+    warn "JMAP " . Dumper($Requests, $Response);
+  }
 
   # check your own success on the Response object
   if (wantarray) {
