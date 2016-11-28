@@ -1,5 +1,12 @@
 Revision history for Perl extension Mail::JMAPTalk.
 
+0.03  Mon Nov 28 22:57:19 2016
+	- add upload support
+	- add DEBUGJMAP environment variable
+
+0.02  Tue Aug 11 16:04:30 2015
+	- add JSON::XS dependency
+
 0.01  Thu Jul  2 14:34:54 2015
 	- original version; created by h2xs 1.23 with options
 		-AX --skip-exporter --use-new-tests -n Mail::JMAPTalk
