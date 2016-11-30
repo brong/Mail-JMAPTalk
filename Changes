@@ -1,5 +1,8 @@
 Revision history for Perl extension Mail::JMAPTalk.
 
+0.04  Wed Nov 30 14:57:15 2016 
+    - depend on HTTP::Tiny
+
 0.03  Mon Nov 28 22:57:19 2016
 	- add upload support
 	- add DEBUGJMAP environment variable
