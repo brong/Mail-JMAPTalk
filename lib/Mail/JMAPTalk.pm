@@ -204,6 +204,10 @@ sub Upload {
 
 sub Download {
   my $Self = shift;
+  my $cb;
+  if (ref($_[0]) eq 'CODE') {
+    $cb = shift;
+  }
   my $uri = $Self->downloaduri(@_);
 
   my %Headers;
@@ -214,7 +218,9 @@ sub Download {
     $Headers{'Authorization'} = "JMAP $Self->{token}";
   }
 
-  my $Response = $Self->ua->get($uri, { headers => \%Headers });
+  my %getopts = (headers => \%Headers);
+  $getopts{data_callback} = $cb if $cb;
+  my $Response = $Self->ua->get($uri, \%getopts);
 
   if ($ENV{DEBUGJMAP}) {
     warn "JMAP DOWNLOAD @_ " . Dumper($Response);
