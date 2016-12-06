@@ -44,7 +44,7 @@ sub uploaduri {
   my $scheme = $Self->{scheme} // 'http';
   my $host = $Self->{host} // 'localhost';
   my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
-  my $url = $Self->{uploadurl} // '/upload';
+  my $url = $Self->{uploadurl} // '/jmap/upload';
 
   return $url if $url =~ m/^http/;
 
@@ -59,7 +59,7 @@ sub downloaduri {
   my $scheme = $Self->{scheme} // 'http';
   my $host = $Self->{host} // 'localhost';
   my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
-  my $url = $Self->{downloadurl} // '/download/{accountId}/{blobId}/{name}';
+  my $url = $Self->{downloadurl} // '/jmap/download/{accountId}/{blobId}/{name}';
 
   my %map = (
     accountId => $accountId,
