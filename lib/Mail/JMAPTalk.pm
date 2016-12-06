@@ -12,7 +12,7 @@ use File::LibMagic;
 use Carp qw(confess);
 use Data::Dumper;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 our $CLIENT = "Net-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
