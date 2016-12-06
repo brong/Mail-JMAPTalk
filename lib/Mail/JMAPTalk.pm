@@ -51,6 +51,29 @@ sub uploaduri {
   return "$scheme://$host:$port$url";
 }
 
+sub downloaduri {
+  my $Self = shift;
+  my ($accountId, $blobId, $name) = @_;
+  die "need account and blob" unless ($accountId and $blobId);
+  $name ||= "download";
+  my $scheme = $Self->{scheme} // 'http';
+  my $host = $Self->{host} // 'localhost';
+  my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
+  my $url = $Self->{downloadurl} // '/download/{accountId}/{blobId}/{name}';
+
+  my %map = (
+    accountId => $accountId,
+    blobId => $blobId,
+    name => $name,
+  );
+
+  $url =~ s/\{([a-zA-Z0-9_]+)\}/$map{$1}||''/ges;
+
+  return $url if $url =~ m/^http/;
+
+  return "$scheme://$host:$port$url";
+}
+
 sub uri {
   my $Self = shift;
   my $scheme = $Self->{scheme} // 'http';
@@ -175,6 +198,23 @@ sub Upload {
   return $jdata;
 }
 
+sub Download {
+  my $Self = shift;
+  my $uri = $Self->downloaduri(@_);
+
+  my %Headers;
+  if ($Self->{user}) {
+    $Headers{'Authorization'} = $Self->auth_header();
+  }
+  if ($Self->{token}) {
+    $Headers{'Authorization'} = "JMAP $Self->{token}";
+  }
+
+  my $Response = $Self->ua->get($uri, { headers => \%Headers });
+
+  die "Failed to download $uri" unless $Response->{success};
+  return $Response->{content};
+}
 
 1;
 __END__
