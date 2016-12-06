@@ -1,5 +1,8 @@
 Revision history for Perl extension Mail::JMAPTalk.
 
+0.06  Tue Dec 6 13:41:05 2016 
+    - fix Download API
+
 0.05  Tue Dec 6 13:41:05 2016 
     - add Download API
 

@@ -12,7 +12,7 @@ use File::LibMagic;
 use Carp qw(confess);
 use Data::Dumper;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 our $CLIENT = "Net-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
@@ -227,7 +227,7 @@ sub Download {
   }
 
   die "Failed to download $uri" unless $Response->{success};
-  return $Response->{content};
+  return $Response;
 }
 
 1;
