@@ -182,6 +182,10 @@ sub Upload {
     content => $data,
   });
 
+  if ($ENV{DEBUGJMAP}) {
+    warn "JMAP UPLOAD " . Dumper($Response);
+  }
+
   my $jdata;
   $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
 
@@ -211,6 +215,10 @@ sub Download {
   }
 
   my $Response = $Self->ua->get($uri, { headers => \%Headers });
+
+  if ($ENV{DEBUGJMAP}) {
+    warn "JMAP DOWNLOAD @_ " . Dumper($Response);
+  }
 
   die "Failed to download $uri" unless $Response->{success};
   return $Response->{content};
