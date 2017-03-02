@@ -1,5 +1,8 @@
 Revision history for Perl extension Mail::JMAPTalk.
 
+0.07  Thu Mar 2 19:04:00 CET 2017
+    - implement JMAP auth
+
 0.06  Tue Dec 6 13:41:05 2016 
     - fix Download API
 

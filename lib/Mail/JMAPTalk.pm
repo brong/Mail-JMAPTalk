@@ -12,7 +12,7 @@ use File::LibMagic;
 use Carp qw(confess);
 use Data::Dumper;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 our $CLIENT = "Net-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
@@ -37,6 +37,18 @@ sub ua {
 sub auth_header {
   my $Self = shift;
   return 'Basic ' . encode_base64("$Self->{user}:$Self->{password}", '');
+}
+
+sub authuri {
+  my $Self = shift;
+  my $scheme = $Self->{scheme} // 'http';
+  my $host = $Self->{host} // 'localhost';
+  my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
+  my $url = $Self->{authurl} // '/jmap/auth/';
+
+  return $url if $url =~ m/^http/;
+
+  return "$scheme://$host:$port$url";
 }
 
 sub uploaduri {
@@ -79,11 +91,44 @@ sub uri {
   my $scheme = $Self->{scheme} // 'http';
   my $host = $Self->{host} // 'localhost';
   my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
-  my $url = $Self->{url} // '/jmap';
+  my $url = $Self->{url} // '/jmap/';
 
   return $url if $url =~ m/^http/;
 
   return "$scheme://$host:$port$url";
+}
+
+sub AuthRequest {
+  my ($Self, $Requests, %Headers) = @_;
+
+  $Headers{'Content-Type'} //= "application/json";
+  $Headers{'Accept'} //= "application/json";
+
+  my $uri = $Self->authuri();
+
+  my $Response = $Self->ua->post($uri, {
+    headers => \%Headers,
+    content => encode_json($Requests),
+  });
+
+  my $jdata;
+  $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
+
+  if ($ENV{DEBUGJMAP}) {
+    warn "JMAP " . Dumper($Requests, $Response);
+  }
+
+  # check your own success on the Response object
+  if (wantarray) {
+    return ($Response, $jdata);
+  }
+
+  confess "JMAP request for $Self->{user} failed ($uri): $Response->{status} $Response->{reason}: $Response->{content}"
+    unless $Response->{success};
+
+  confess "INVALID JSON $Response->{content}" unless $jdata;
+
+  return $jdata;
 }
 
 sub Login {
@@ -96,11 +141,11 @@ sub Login {
     deviceName => $Self->{deviceName} || 'api',
   });
 
-  while ($data->{continuationToken}) {
-    die "Unknown method" unless grep { $_ eq 'password' } @{$data->{methods}};
-    $data = $Self->Request({
-      token => $data->{continuationToken},
-      method => 'password',
+  while ($data->{loginId}) {
+    die "Unknown method" unless grep { $_->{type} eq 'password' } @{$data->{methods}};
+    $data = $Self->AuthRequest({
+      loginId => $data->{loginId},
+      type => 'password',
       password => $Password,
     });
   }
@@ -108,7 +153,7 @@ sub Login {
   die "Failed to get a token" unless $data->{accessToken};
 
   $Self->{token} = $data->{accessToken};
-  $Self->{url} = $data->{uri};
+  $Self->{url} = $data->{apiUrl};
   $Self->{upload} = $data->{upload};
   $Self->{eventSource} = $data->{eventSource};
 
@@ -124,7 +169,7 @@ sub Request {
     $Headers{'Authorization'} = $Self->auth_header();
   }
   if ($Self->{token}) {
-    $Headers{'Authorization'} = "JMAP $Self->{token}";
+    $Headers{'Authorization'} = "Bearer $Self->{token}";
   }
 
   my $uri = $Self->uri();
