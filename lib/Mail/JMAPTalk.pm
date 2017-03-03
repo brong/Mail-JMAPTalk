@@ -56,7 +56,7 @@ sub uploaduri {
   my $scheme = $Self->{scheme} // 'http';
   my $host = $Self->{host} // 'localhost';
   my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
-  my $url = $Self->{uploadurl} // '/jmap/upload';
+  my $url = $Self->{uploadurl} // '/jmap/upload/';
 
   return $url if $url =~ m/^http/;
 
@@ -217,7 +217,7 @@ sub Upload {
     $Headers{'Authorization'} = $Self->auth_header();
   }
   if ($Self->{token}) {
-    $Headers{'Authorization'} = "JMAP $Self->{token}";
+    $Headers{'Authorization'} = "Bearer $Self->{token}";
   }
 
   my $uri = $Self->uploaduri();
@@ -260,7 +260,7 @@ sub Download {
     $Headers{'Authorization'} = $Self->auth_header();
   }
   if ($Self->{token}) {
-    $Headers{'Authorization'} = "JMAP $Self->{token}";
+    $Headers{'Authorization'} = "Bearer $Self->{token}";
   }
 
   my %getopts = (headers => \%Headers);
