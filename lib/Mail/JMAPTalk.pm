@@ -161,7 +161,9 @@ sub Login {
 }
 
 sub Request {
-  my ($Self, $Requests, %Headers) = @_;
+  my ($Self, $MethodCalls, $Using, %Headers) = @_;
+
+  $Using ||= ['ietf:jmapmail'];
 
   $Headers{'Content-Type'} //= "application/json";
 
@@ -174,16 +176,18 @@ sub Request {
 
   my $uri = $Self->uri();
 
+  my $Request = { using => $Using, methodCalls => $MethodCalls };
+
   my $Response = $Self->ua->post($uri, {
     headers => \%Headers,
-    content => encode_json($Requests),
+    content => encode_json($Request),
   });
 
   my $jdata;
   $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
 
   if ($ENV{DEBUGJMAP}) {
-    warn "JMAP " . Dumper($Requests, $Response);
+    warn "JMAP " . Dumper($Request, $Response);
   }
 
   # check your own success on the Response object
@@ -196,7 +200,7 @@ sub Request {
 
   confess "INVALID JSON $Response->{content}" unless $jdata;
 
-  return $jdata;
+  return $jdata->{methodResponses};
 }
 
 sub _get_type {
