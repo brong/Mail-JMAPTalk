@@ -53,10 +53,17 @@ sub authuri {
 
 sub uploaduri {
   my $Self = shift;
+  my $accountId = shift;
+  die "need account" unless $accountId;
   my $scheme = $Self->{scheme} // 'http';
   my $host = $Self->{host} // 'localhost';
   my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
-  my $url = $Self->{uploadurl} // '/jmap/upload/';
+  my $url = $Self->{uploadurl} // '/jmap/upload/{accountId}/';
+
+  my %map = (
+    accountId => $accountId,
+  );
+  $url =~ s/\{([a-zA-Z0-9_]+)\}/$map{$1}||''/ges;
 
   return $url if $url =~ m/^http/;
 
@@ -216,10 +223,8 @@ sub Upload {
 
   my %Headers;
   $Headers{'Content-Type'} = $type || _get_type($data);
+  $accountId = $accountId || $Self->{user};
 
-  if (defined $accountId) {
-      $Headers{'X-JMAP-AccountId'} = $accountId;
-  }
   if ($Self->{user}) {
     $Headers{'Authorization'} = $Self->auth_header();
   }
@@ -227,7 +232,7 @@ sub Upload {
     $Headers{'Authorization'} = "Bearer $Self->{token}";
   }
 
-  my $uri = $Self->uploaduri();
+  my $uri = $Self->uploaduri($accountId);
 
   my $Response = $Self->ua->post($uri, {
     headers => \%Headers,
