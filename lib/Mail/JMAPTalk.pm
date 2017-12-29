@@ -12,7 +12,7 @@ use File::LibMagic;
 use Carp qw(confess);
 use Data::Dumper;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 our $CLIENT = "Net-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
@@ -105,24 +105,22 @@ sub uri {
   return "$scheme://$host:$port$url";
 }
 
-sub AuthRequest {
-  my ($Self, $Requests, %Headers) = @_;
+sub JSONPOST {
+  my ($Self, $Uri, $Request, %Headers) = @_;
 
   $Headers{'Content-Type'} //= "application/json";
   $Headers{'Accept'} //= "application/json";
 
-  my $uri = $Self->authuri();
-
-  my $Response = $Self->ua->post($uri, {
+  my $Response = $Self->ua->post($Uri, {
     headers => \%Headers,
-    content => encode_json($Requests),
+    content => encode_json($Request),
   });
 
   my $jdata;
   $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
 
   if ($ENV{DEBUGJMAP}) {
-    warn "JMAP " . Dumper($Requests, $Response);
+    warn "JMAP " . Dumper($Uri, \%Headers, $Request, $Response);
   }
 
   # check your own success on the Response object
@@ -130,12 +128,18 @@ sub AuthRequest {
     return ($Response, $jdata);
   }
 
-  confess "JMAP request for $Self->{user} failed ($uri): $Response->{status} $Response->{reason}: $Response->{content}"
+  confess "JMAP request for $Self->{user} failed ($Uri): $Response->{status} $Response->{reason}: $Response->{content}"
     unless $Response->{success};
 
   confess "INVALID JSON $Response->{content}" unless $jdata;
 
   return $jdata;
+}
+
+sub AuthRequest {
+  my ($Self, $Request, %Headers) = @_;
+
+  return $Self->JSONPOST($Self->authuri(), $Request, %Headers);
 }
 
 sub Login {
@@ -168,11 +172,7 @@ sub Login {
 }
 
 sub Request {
-  my ($Self, $MethodCalls, $Using, %Headers) = @_;
-
-  $Using ||= ['ietf:jmapmail'];
-
-  $Headers{'Content-Type'} //= "application/json";
+  my ($Self, $Request, %Headers) = @_;
 
   if ($Self->{user}) {
     $Headers{'Authorization'} = $Self->auth_header();
@@ -181,33 +181,19 @@ sub Request {
     $Headers{'Authorization'} = "Bearer $Self->{token}";
   }
 
-  my $uri = $Self->uri();
+  return $Self->JSONPOST($Self->uri(), $Request, %Headers);
+}
+
+sub CallMethods {
+  my ($Self, $MethodCalls, $Using, %Headers) = @_;
+
+  $Using ||= ['ietf:jmapmail'];
 
   my $Request = { using => $Using, methodCalls => $MethodCalls };
 
-  my $Response = $Self->ua->post($uri, {
-    headers => \%Headers,
-    content => encode_json($Request),
-  });
+  my $Response = $Self->Request($Request, %Headers);
 
-  my $jdata;
-  $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
-
-  if ($ENV{DEBUGJMAP}) {
-    warn "JMAP " . Dumper($Request, $Response);
-  }
-
-  # check your own success on the Response object
-  if (wantarray) {
-    return ($Response, $jdata);
-  }
-
-  confess "JMAP request for $Self->{user} failed ($uri): $Response->{status} $Response->{reason}: $Response->{content}"
-    unless $Response->{success};
-
-  confess "INVALID JSON $Response->{content}" unless $jdata;
-
-  return $jdata->{methodResponses};
+  return $Response->{methodResponses};
 }
 
 sub _get_type {
