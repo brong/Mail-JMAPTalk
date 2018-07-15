@@ -187,7 +187,7 @@ sub Request {
 sub CallMethods {
   my ($Self, $MethodCalls, $Using, %Headers) = @_;
 
-  $Using ||= ['ietf:jmapmail'];
+  $Using ||= ['urn:ietf:params:jmap:core', 'urn:ietf:params:jmap:mail'];
 
   my $Request = { using => $Using, methodCalls => $MethodCalls };
 
