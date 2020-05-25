@@ -6,7 +6,7 @@ use warnings;
 package Mail::JMAPTalk;
 
 use HTTP::Tiny;
-use JSON::XS qw(decode_json encode_json);
+use JSON;
 use Convert::Base64;
 use File::LibMagic;
 use Carp qw(confess);
@@ -16,6 +16,8 @@ our $VERSION = '0.13';
 
 our $CLIENT = "Mail-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
+
+our $JSON = JSON->new->utf8->max_depth(2048);
 
 sub new {
   my ($Proto, %Args) = @_;
@@ -118,11 +120,11 @@ sub JSONPOST {
 
   my $Response = $Self->ua->post($Uri, {
     headers => \%Headers,
-    content => encode_json($Request),
+    content => $JSON->encode($Request),
   });
 
   my $jdata;
-  $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
+  $jdata = eval { $JSON->decode($Response->{content}) } if $Response->{success};
 
   if ($ENV{DEBUGJMAP}) {
     warn "JMAP " . Dumper($Uri, \%Headers, $Request, $Response);
@@ -259,7 +261,7 @@ sub Upload {
   }
 
   my $jdata;
-  $jdata = eval { decode_json($Response->{content}) } if $Response->{success};
+  $jdata = eval { $JSON->decode($Response->{content}) } if $Response->{success};
 
   # check your own success on the Response object
   if (wantarray) {
