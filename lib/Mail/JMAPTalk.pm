@@ -82,6 +82,9 @@ sub downloaduri {
   my $port = $Self->{port} // ($scheme eq 'http' ? 80 : 443);
   my $url = $Self->{downloadurl} // '/jmap/download/{accountId}/{blobId}/{name}';
 
+  # needs to be encoded as bytes for URI encoding
+  utf8::encode($name);
+
   my %map = (
     accountId => $accountId,
     blobId => $blobId,
