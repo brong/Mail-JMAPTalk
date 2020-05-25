@@ -211,6 +211,16 @@ sub CallMethods {
   return $Response->{methodResponses};
 }
 
+sub Call {
+  my ($Self, $Method, $Params, @Args) = @_;
+  $Params ||= {};
+  my $Res = $Self->CallMethods([[$Method, $Params, "c1"]], @Args);
+  return undef unless ref $Res;
+  return undef unless ref $Res->[0];
+  return undef unless $Res->[0][0] eq $Method;
+  return undef unless $Res->[0][2] eq 'c1';
+  return $Res->[0]->[1];
+}
 
 sub _get_type {
   my $data = shift;
