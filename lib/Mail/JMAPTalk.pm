@@ -197,12 +197,20 @@ sub CallMethods {
 
   $Using ||= $Self->{Using};
 
-  my $Request = { using => $Using, methodCalls => $MethodCalls };
+  my $Request = {
+    using => $Using,
+    methodCalls => $MethodCalls,
+    createdIds => $Self->{CreatedIds} || {},
+  };
 
   my $Response = $Self->Request($Request, %Headers);
 
+  $Self->{CreatedIds} = $Response->{createdIds};
+  $Self->{SessionState} = $Response->{sessionState};
+
   return $Response->{methodResponses};
 }
+
 
 sub _get_type {
   my $data = shift;
