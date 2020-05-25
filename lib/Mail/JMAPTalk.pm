@@ -25,7 +25,7 @@ sub new {
 
   my $Self = bless { %Args }, $Class;
 
-  $Self->{Using} ||= ['urn:ietf:params:jmap:core', 'urn:ietf:params:jmap:mail'];
+  $Self->{using} ||= ['urn:ietf:params:jmap:core', 'urn:ietf:params:jmap:mail'];
 
   return $Self;
 }
@@ -193,14 +193,14 @@ sub Request {
 
 sub DefaultUsing {
   my ($Self, $Using) = @_;
-  return $Self->{Using} unless $Using;
-  $Self->{Using} = $Using;
+  return $Self->{using} unless $Using;
+  $Self->{using} = $Using;
 }
 
 sub CallMethods {
   my ($Self, $MethodCalls, $Using, %Headers) = @_;
 
-  $Using ||= $Self->{Using};
+  $Using ||= $Self->{using};
 
   my $Request = {
     using => $Using,
