@@ -298,7 +298,6 @@ sub Download {
     warn "JMAP DOWNLOAD @_ " . Dumper($Response);
   }
 
-  die "Failed to download $uri" unless $Response->{success};
   return $Response;
 }
 
