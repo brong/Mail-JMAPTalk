@@ -14,7 +14,7 @@ use Data::Dumper;
 
 our $VERSION = '0.13';
 
-our $CLIENT = "Net-JMAPTalk";
+our $CLIENT = "Mail-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
 
 sub new {
