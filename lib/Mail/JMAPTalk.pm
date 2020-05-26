@@ -227,7 +227,7 @@ sub downloaduri {
   my %map = (
     accountId => $accountId,
     blobId => $blobId,
-    name => $name,
+    name => $name =~ s/([^a-zA-Z0-9])/sprintf('%%%02X', ord($1))/egr
   );
 
   $url =~ s/\{([a-zA-Z0-9_]+)\}/$map{$1}||''/ges;
