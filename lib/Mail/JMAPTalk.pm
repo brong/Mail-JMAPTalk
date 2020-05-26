@@ -12,7 +12,7 @@ use File::LibMagic;
 use Carp qw(confess);
 use Data::Dumper;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 our $CLIENT = "Mail-JMAPTalk";
 our $AGENT = "$CLIENT/$VERSION";
@@ -25,7 +25,7 @@ Mail::JMAPTalk - Basic interface to talk to JMAP Servers
 
 =head1 VERSION
 
-Version 0.14
+Version 0.15
 
 =head1 SYNOPSIS
 

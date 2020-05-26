@@ -1,5 +1,8 @@
 Revision history for Perl extension Mail::JMAPTalk.
 
+0.15  Tue May 26 11:01:00 AEST 2019
+    - Actually encode the filename when creating a URI
+
 0.14  Mon May 25 18:34:12 AEST 2019
     - User-Agent should be Mail:: rather than Net::
     - new() takes lowercase using, not "Using".
